@@ -96,8 +96,7 @@ def f5(conn):
                 else:
                     saida = "Adulto"
     saida = f"\nSua categoria é {saida}\n\n{HELP}\n"
-    return saida
-    
+    return saida  
 def f6(conn):
     conn.send("Entre com o nome:".encode(FORMAT))
     nome = read(conn)
@@ -179,13 +178,16 @@ def f9(conn):
 
 def read(conn):
     msg_length = conn.recv(HEADER).decode(FORMAT)
+    
     msg_length = int(msg_length)
+    #print(f"read len {msg_length}")
     msg = conn.recv(msg_length).decode(FORMAT)
+    #print(f"read msg {msg}")
     return msg
 
 def handle_client(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected.")
-    conn.send("Entre com o némero função entre 1 e 9 ou \"exit\" para sair".encode(FORMAT))
+    conn.send(HELP.encode(FORMAT))
     connected = True
     while connected:
         msg_length = conn.recv(HEADER).decode(FORMAT)
