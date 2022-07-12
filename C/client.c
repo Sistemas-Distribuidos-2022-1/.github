@@ -41,16 +41,19 @@ int main(int argc, char const *argv[]){
 
     int run = 1;
     while(run){
+
         memset(buffer,0, sizeof buffer);
         memset(len,0, sizeof len);
         memset(len2,0, sizeof len2);
         memset(msg,0, sizeof msg);
         
         fgets(msg, MAX-1, stdin);
-        if (strcmp(msg, "exit\n") == 0)return 0;        
+        msg[strcspn(msg, "\n")] = 0;
+        if (strcmp(msg, "exit") == 0) run = 0;  
+
 
         intlen = strlen(msg);
-        printf("len: %d\n",intlen);
+        //printf("len: %d\n",intlen);
         sprintf(len2, "%d", intlen); 
                 
         for(i=0; i<(64-(strlen(len2)));i++) len[i] = '0';
@@ -58,10 +61,10 @@ int main(int argc, char const *argv[]){
         
         strcat(len,len2);
 
-        printf("enviar: %s\n",len);
+        //printf("enviar: %s\n",len);
         send(sock, len, strlen(len), 0);
 
-        printf("enviar: %s\n",msg);
+        //printf("enviar: %s\n",msg);
         send(sock, msg, strlen(msg), 0);
 
         //printf("escrevendo...\n");

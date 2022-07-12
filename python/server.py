@@ -28,7 +28,7 @@ def f1(conn):
     else: 
         salario *= 1.18
 
-    saida = f"\n{nome}\nR$ {salario}\n\n{HELP}"
+    saida = f"\nReajuste de {nome} é R$ {salario}\n\n{HELP}"
     #print(saida)
     return saida
 def f2(conn):
@@ -96,8 +96,7 @@ def f5(conn):
                 else:
                     saida = "Adulto"
     saida = f"\nSua categoria é {saida}\n\n{HELP}\n"
-    return saida
-    
+    return saida   
 def f6(conn):
     conn.send("Entre com o nome:".encode(FORMAT))
     nome = read(conn)
@@ -185,36 +184,40 @@ def read(conn):
 
 def handle_client(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected.")
-    conn.send("Entre com o némero função entre 1 e 9 ou \"exit\" para sair".encode(FORMAT))
+    conn.send(HELP.encode(FORMAT))
     connected = True
     while connected:
         msg_length = conn.recv(HEADER).decode(FORMAT)
         if msg_length:
             msg_length = int(msg_length)
             msg = conn.recv(msg_length).decode(FORMAT)
-            if msg == EXIT:
+            print(f"msg = {msg}")
+            if (msg == EXIT):
                 connected = False
                 conn.send("[DISCONNECTING...]".encode(FORMAT))
             else:
-                if int(msg) == 1:
-                    conn.send(f1(conn).encode(FORMAT))
-                if int(msg) == 2:
-                    conn.send(f2(conn).encode(FORMAT))
-                if int(msg) == 3:
-                    conn.send(f3(conn).encode(FORMAT))
-                if int(msg) == 4:
-                    conn.send(f4(conn).encode(FORMAT))
-                if int(msg) == 5:
-                    conn.send(f5(conn).encode(FORMAT))
-                if int(msg) == 6:
-                    conn.send(f6(conn).encode(FORMAT))
-                if int(msg) == 7:
-                    conn.send(f7(conn).encode(FORMAT))
-                if int(msg) == 8:
-                    conn.send(f8(conn).encode(FORMAT))
-                if int(msg) == 9:
-                    conn.send(f9(conn).encode(FORMAT))
-
+                if(int(msg)>0 and int(msg)<10):
+                    if int(msg) == 1:
+                        conn.send(f1(conn).encode(FORMAT))
+                    if int(msg) == 2:
+                        conn.send(f2(conn).encode(FORMAT))
+                    if int(msg) == 3:
+                        conn.send(f3(conn).encode(FORMAT))
+                    if int(msg) == 4:
+                        conn.send(f4(conn).encode(FORMAT))
+                    if int(msg) == 5:
+                        conn.send(f5(conn).encode(FORMAT))
+                    if int(msg) == 6:
+                        conn.send(f6(conn).encode(FORMAT))
+                    if int(msg) == 7:
+                        conn.send(f7(conn).encode(FORMAT))
+                    if int(msg) == 8:
+                        conn.send(f8(conn).encode(FORMAT))
+                    if int(msg) == 9:
+                        conn.send(f9(conn).encode(FORMAT))
+                else: 
+                    print(f"{msg} não e valido")
+                    conn.send(f"[ERRO] {msg} não e valido".encode(FORMAT))
             #print(f"[{addr}] {msg}")
             #conn.send("OLHA DE VOLTA".encode(FORMAT))
 
