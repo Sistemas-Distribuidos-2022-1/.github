@@ -1,7 +1,10 @@
+from database import IO, Client
+from datetime import datetime
 import socket
 import string
 import threading
 import random
+import peewee
 
 FORMAT = 'utf-8'
 HEADER = 64
@@ -13,7 +16,7 @@ HELP = "[HELP] Entre com o némero função entre 1 e 9 ou \"exit\" para sair:"
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
-print(ADDR)
+print(f"[SERVER]:\tADDR = {ADDR}")
 
 def f1(conn):
     conn.send("Entre com o nome:".encode(FORMAT))
@@ -183,7 +186,18 @@ def read(conn):
     return msg
 
 def handle_client(conn, addr):
-    print(f"[NEW CONNECTION] {addr} connected.")
+
+    print(f"[SERVER]:\t[NEW CONNECTION] {addr} connected.")
+    #DB save cliente ADDR
+    try:
+        Client.create(
+            addrClient = addr
+        )
+        print(f"[DATABASE]:\t{addr} foi cadastrado.")
+    except:
+        print(f"[DATABASE]:\t{addr} Já esta cadastrado.")
+
+    #receiver and processing msg from CLIENT
     conn.send(HELP.encode(FORMAT))
     connected = True
     while connected:
@@ -191,48 +205,60 @@ def handle_client(conn, addr):
         if msg_length:
             msg_length = int(msg_length)
             msg = conn.recv(msg_length).decode(FORMAT)
-            print(f"msg = {msg}")
+
             if (msg == EXIT):
                 connected = False
-                conn.send("[DISCONNECTING...]".encode(FORMAT))
+                msgToClinte = "\n[DISCONNECTING] ...\n"
+                conn.send(msgToClinte.encode(FORMAT))
             else:
                 if(int(msg)>0 and int(msg)<10):
                     if int(msg) == 1:
-                        conn.send(f1(conn).encode(FORMAT))
+                        msgToClinte = f1(conn)
+                        conn.send(msgToClinte.encode(FORMAT))
                     if int(msg) == 2:
-                        conn.send(f2(conn).encode(FORMAT))
+                        msgToClinte = f2(conn)
+                        conn.send(msgToClinte.encode(FORMAT))
                     if int(msg) == 3:
-                        conn.send(f3(conn).encode(FORMAT))
+                        msgToClinte = f3(conn)
+                        conn.send(msgToClinte.encode(FORMAT))
                     if int(msg) == 4:
-                        conn.send(f4(conn).encode(FORMAT))
+                        msgToClinte = f4(conn)
+                        conn.send(msgToClinte.encode(FORMAT))
                     if int(msg) == 5:
-                        conn.send(f5(conn).encode(FORMAT))
+                        msgToClinte = f5(conn)
+                        conn.send(msgToClinte.encode(FORMAT))
                     if int(msg) == 6:
-                        conn.send(f6(conn).encode(FORMAT))
+                        msgToClinte = f6(conn)
+                        conn.send(msgToClinte.encode(FORMAT))
                     if int(msg) == 7:
-                        conn.send(f7(conn).encode(FORMAT))
+                        msgToClinte = f7(conn)
+                        conn.send(msgToClinte.encode(FORMAT))
                     if int(msg) == 8:
-                        conn.send(f8(conn).encode(FORMAT))
+                        msgToClinte = f8(conn)
+                        conn.send(msgToClinte.encode(FORMAT))
                     if int(msg) == 9:
-                        conn.send(f9(conn).encode(FORMAT))
+                        msgToClinte = f9(conn)
+                        conn.send(msgToClinte.encode(FORMAT))
                 else: 
-                    print(f"{msg} não e valido")
+                    print(f"[SERVER]:\t{msg} não e valido")
                     conn.send(f"[ERRO] {msg} não e valido".encode(FORMAT))
-            #print(f"[{addr}] {msg}")
-            #conn.send("OLHA DE VOLTA".encode(FORMAT))
+            
+            #DB save msg receiver and sended 
+            
+
 
     conn.close()
 
 def start():
     server.listen()
-    print(f"[LISTENING] Server is listening on {SERVER}")
+    print(f"[SERVER]:\t[LISTENING] Server is listening on {SERVER}")
     while True:
         conn, addr = server.accept()
         thread = threading.Thread(target=handle_client, args=(conn, addr))
         thread.start()
-        print(f"[CONECÇÕES ATIVAS] {threading.activeCount() - 1}")
+        print(f"[SERVER]:\t[CONECÇÕES ATIVAS] = {threading.activeCount() - 1}")
 
-print("INICIANDO......")
+print("[SERVER]:\tIniciando ...")
 start()
 
 
