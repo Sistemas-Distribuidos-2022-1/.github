@@ -1,4 +1,6 @@
-from database import IO, Client
+from multiprocessing import connection
+from venv import create
+from database import IO, Client, Connections
 from datetime import datetime
 import socket
 import string
@@ -185,17 +187,31 @@ def read(conn):
     msg = conn.recv(msg_length).decode(FORMAT)
     return msg
 
-def handle_client(conn, addr):
+def handle_client(conn, addr, connectionTime):
 
     print(f"[SERVER]:\t[NEW CONNECTION] {addr} connected.")
+
     #DB save cliente ADDR
+
+    
     try:
-        Client.create(
+        cliente_cliente = Client.create(
             addrClient = addr
         )
-        print(f"[DATABASE]:\t{addr} foi cadastrado.")
+        print(f"[DATABASE]:\t{addr} Foi cadastrado.")
     except:
+        cliente_cliente = Client.select().where(Client.addrClient == addr)
         print(f"[DATABASE]:\t{addr} Já esta cadastrado.")
+
+    #DB save cliente connection time
+    try:
+        client_connetions = Connections.create(
+            fromClient = cliente_cliente,
+            timeConnection = connectionTime 
+        )
+        print(f"[DATABASE]:\tConecção [SALVO] no banco de dados.")
+    except:
+        print(f"[DATABASE]:\t[ERRO] não foi possivel salvar as conecções banco de dados.")
 
     #receiver and processing msg from CLIENT
     conn.send(HELP.encode(FORMAT))
@@ -205,11 +221,22 @@ def handle_client(conn, addr):
         if msg_length:
             msg_length = int(msg_length)
             msg = conn.recv(msg_length).decode(FORMAT)
+            recivedTime = datetime.now()
 
             if (msg == EXIT):
                 connected = False
-                msgToClinte = "\n[DISCONNECTING] ...\n"
+                msgToClinte = f"[SERVER]:\t{addr} [DISCONNECTING] ...\n"
                 conn.send(msgToClinte.encode(FORMAT))
+                sededTime = datetime.now()
+
+                try:
+                    client_connetions.timeDisconnection = datetime.now()
+                    client_connetions.save(only=[client_connetions.timeDisconnection])
+                    print(f"[DATABASE]:\tDisconecção [SALVO] no banco de dados.")
+                except:
+                    print(f"[DATABASE]:\t[ERRO] não foi possivel salvar as disconecções banco de dados.")
+                    
+
             else:
                 if(int(msg)>0 and int(msg)<10):
                     if int(msg) == 1:
@@ -239,13 +266,25 @@ def handle_client(conn, addr):
                     if int(msg) == 9:
                         msgToClinte = f9(conn)
                         conn.send(msgToClinte.encode(FORMAT))
-                else: 
+                    sededTime = datetime.now()
+                else:
                     print(f"[SERVER]:\t{msg} não e valido")
-                    conn.send(f"[ERRO] {msg} não e valido".encode(FORMAT))
+                    msgToClinte = f"[SERVER]:\t[ERRO] {msg} não e valido"
+                    conn.send(msgToClinte.encode(FORMAT))
+                    sededTime = datetime.now()
             
             #DB save msg receiver and sended 
-            
-
+            try:
+                cliente_io = IO.create(
+                    fromclient = cliente_cliente, 
+                    messageReciver = msg,
+                    messageSender = msgToClinte,
+                    timeReciver = recivedTime,
+                    timeSender = sededTime
+                )
+                print(f"[DATABASE]:\tInput e output [SALVO] no banco de dados.")
+            except:
+                print(f"[DATABASE]:\t[ERRO] não foi possivel salvar input e output no banco de dados.")
 
     conn.close()
 
@@ -253,8 +292,9 @@ def start():
     server.listen()
     print(f"[SERVER]:\t[LISTENING] Server is listening on {SERVER}")
     while True:
+        connectionTime = datetime.now()
         conn, addr = server.accept()
-        thread = threading.Thread(target=handle_client, args=(conn, addr))
+        thread = threading.Thread(target=handle_client, args=(conn, addr, connectionTime))
         thread.start()
         print(f"[SERVER]:\t[CONECÇÕES ATIVAS] = {threading.activeCount() - 1}")
 
