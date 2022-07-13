@@ -21,7 +21,7 @@ class IO(BaseModel):
 class Connections(BaseModel):
     fromClient = peewee.ForeignKeyField(Client, backref='connections')
     timeConnection = peewee.DateTimeField(default=datetime.now())
-    timeDisconnection = peewee.DateTimeField(default=datetime.now())
+    timeDisconnection = peewee.DateTimeField(null=True)
     
 
 try:
@@ -34,14 +34,3 @@ try:
 except:
     print("[DATABASE]:\t[ERRO] ao criar tabela")
 
-### TEST
-try:
-    cliente_cliente = Client.create(
-        addrClient = "1523sfsasdafssd435"
-    )
-except:
-    cliente_cliente = Client.select().where(Client.addrClient == "1523sfsasdafssd435")
-
-Connections.create(
-    fromClient = cliente_cliente   
-)

@@ -193,7 +193,6 @@ def handle_client(conn, addr, connectionTime):
 
     #DB save cliente ADDR
 
-    
     try:
         cliente_cliente = Client.create(
             addrClient = addr
@@ -209,9 +208,9 @@ def handle_client(conn, addr, connectionTime):
             fromClient = cliente_cliente,
             timeConnection = connectionTime 
         )
-        print(f"[DATABASE]:\tConecção [SALVO] no banco de dados.")
+        print(f"[DATABASE]:\tconexão [SALVO] no banco de dados.")
     except:
-        print(f"[DATABASE]:\t[ERRO] não foi possivel salvar as conecções banco de dados.")
+        print(f"[DATABASE]:\t[ERRO] não foi possivel salvar as conexões banco de dados.")
 
     #receiver and processing msg from CLIENT
     conn.send(HELP.encode(FORMAT))
@@ -225,16 +224,16 @@ def handle_client(conn, addr, connectionTime):
 
             if (msg == EXIT):
                 connected = False
-                msgToClinte = f"[SERVER]:\t{addr} [DISCONNECTING] ...\n"
+                msgToClinte = f"[SERVER]:\t{addr} [DESCONNECTING] ...\n"
                 conn.send(msgToClinte.encode(FORMAT))
                 sededTime = datetime.now()
 
                 try:
                     client_connetions.timeDisconnection = datetime.now()
-                    client_connetions.save(only=[client_connetions.timeDisconnection])
-                    print(f"[DATABASE]:\tDisconecção [SALVO] no banco de dados.")
+                    client_connetions.save()
+                    print(f"[DATABASE]:\tDesconexão [SALVO] no banco de dados.")
                 except:
-                    print(f"[DATABASE]:\t[ERRO] não foi possivel salvar as disconecções banco de dados.")
+                    print(f"[DATABASE]:\t[ERRO] não foi possivel salvar as desconexões banco de dados.")
                     
 
             else:
@@ -276,7 +275,7 @@ def handle_client(conn, addr, connectionTime):
             #DB save msg receiver and sended 
             try:
                 cliente_io = IO.create(
-                    fromclient = cliente_cliente, 
+                    fromClient = cliente_cliente, 
                     messageReciver = msg,
                     messageSender = msgToClinte,
                     timeReciver = recivedTime,
@@ -296,7 +295,7 @@ def start():
         conn, addr = server.accept()
         thread = threading.Thread(target=handle_client, args=(conn, addr, connectionTime))
         thread.start()
-        print(f"[SERVER]:\t[CONECÇÕES ATIVAS] = {threading.activeCount() - 1}")
+        print(f"[SERVER]:\t[CONEXÕES ATIVAS] = {threading.activeCount() - 1}")
 
 print("[SERVER]:\tIniciando ...")
 start()
