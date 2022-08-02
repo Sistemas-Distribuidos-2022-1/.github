@@ -4,3 +4,4 @@
   * [Python](socket/python) - Cliente, Servidor e DataBase em .py
 - [PUBSUB](pubsub)
 - [RPC](rpc)
+- [Crawler](crawler)
